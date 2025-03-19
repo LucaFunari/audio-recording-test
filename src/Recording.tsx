@@ -11,10 +11,14 @@ function parseTime(n: number) {
   return `${min < 10 ? "0" + min : min}:${secs < 10 ? "0" + secs : secs}`;
 }
 
+const audioSlices: Blob[] = [];
+
 function Recording() {
   const [holding, hold] = React.useState(false);
 
   const [time, setTime] = React.useState(0);
+
+  const [loading, setMockLoading] = React.useState(false);
 
   const [audioSrc, setAudioSrc] = React.useState<string | undefined>(undefined);
   const { mediaRecorder } = useMediaStreamStore();
@@ -40,6 +44,7 @@ function Recording() {
     hold(true);
     mediaRecorder?.start();
   }, [mediaRecorder]);
+
   const stopRecording = React.useCallback(() => {
     hold(false);
 
@@ -47,29 +52,43 @@ function Recording() {
   }, [mediaRecorder]);
 
   React.useEffect(() => {
+    // mediaRecorder?.addEventListener("start", (ev) => {});
+
     mediaRecorder?.addEventListener("dataavailable", (ev) => {
+      setMockLoading(true);
+
+      audioSlices.push(ev.data);
+
+      // const blob = new Blob(audioSlices, {type: 'audio/mpeg-3'})
+
       const audioUrl = URL.createObjectURL(ev.data);
+      // const audio = new Audio(audioUrl);
 
-      const audio = new Audio(audioUrl);
+      setTimeout(() => {
+        // audio.play();
 
-      setAudioSrc(audioUrl);
+        setMockLoading(false);
+
+        setAudioSrc(audioUrl);
+      }, 1e3);
+
+      // return clearTimeout(interval);
     });
   }, [mediaRecorder]);
 
   return (
     <div>
       <p style={{ userSelect: "none" }}> {parseTime(time)}</p>
-
       <button
-        disabled={!mediaRecorder}
+        disabled={!mediaRecorder || loading}
         onPointerDown={startRecording}
         onPointerUp={stopRecording}
         onPointerLeave={stopRecording}
       >
-        {holding ? <Stop /> : <Mic />}
+        {mediaRecorder?.state === "recording" ? <Stop /> : <Mic />}
       </button>
-      <p>{mediaRecorder?.state}</p>
-
+      <br />
+      <br />
       {audioSrc && <audio controls src={audioSrc}></audio>}
       {/* <button
         onClick={() => {

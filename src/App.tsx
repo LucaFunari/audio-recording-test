@@ -16,7 +16,6 @@ function App() {
         });
 
         setMediaRecorder(mediaRecorder);
-        console.debug(stream);
       })
       .catch(function (err) {
         console.error(err);
