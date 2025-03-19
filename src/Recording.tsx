@@ -35,20 +35,39 @@ function Recording() {
     };
   }, []);
 
+  const startRecording = React.useCallback(() => {
+    hold(true);
+    mediaRecorder?.start();
+  }, [mediaRecorder]);
+  const stopRecording = React.useCallback(() => {
+    hold(false);
+
+    mediaRecorder?.stop();
+  }, [mediaRecorder]);
+
+  React.useEffect(() => {
+    mediaRecorder?.addEventListener("dataavailable", (ev) => {
+      const audioUrl = URL.createObjectURL(ev.data);
+
+      const audio = new Audio(audioUrl);
+
+      audio.play();
+    });
+  }, [mediaRecorder]);
+
   return (
     <div>
-      <p>{parseTime(time)}</p>
+      <p style={{ userSelect: "none" }}> {parseTime(time)}</p>
 
-      {JSON.stringify(mediaRecorder)}
       <button
         disabled={!mediaRecorder}
-        onPointerDown={() => hold(true)}
-        onPointerUp={() => hold(false)}
-        onPointerLeave={() => hold(false)}
+        onPointerDown={startRecording}
+        onPointerUp={stopRecording}
+        onPointerLeave={stopRecording}
       >
         {holding ? <Stop /> : <Mic />}
       </button>
-
+      <p>{mediaRecorder?.state}</p>
       {/* <button
         onClick={() => {
           hold((curr) => !curr);
