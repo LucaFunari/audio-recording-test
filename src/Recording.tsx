@@ -16,6 +16,7 @@ function Recording() {
 
   const [time, setTime] = React.useState(0);
 
+  const [audioSrc, setAudioSrc] = React.useState<string | undefined>(undefined);
   const { mediaRecorder } = useMediaStreamStore();
 
   React.useEffect(() => {
@@ -51,7 +52,7 @@ function Recording() {
 
       const audio = new Audio(audioUrl);
 
-      audio.play();
+      setAudioSrc(audioUrl);
     });
   }, [mediaRecorder]);
 
@@ -68,6 +69,8 @@ function Recording() {
         {holding ? <Stop /> : <Mic />}
       </button>
       <p>{mediaRecorder?.state}</p>
+
+      {audioSrc && <audio controls src={audioSrc}></audio>}
       {/* <button
         onClick={() => {
           hold((curr) => !curr);
